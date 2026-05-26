@@ -5,4 +5,7 @@ build:
   tools:
     python: "3.13"
   commands:
-    - echo "Documentation already built"
+    - sphinx-build -b html -W -E source build
+
+sphinx:
+  configuration: conf.py
