@@ -1,0 +1,167 @@
+一、项目资源管理架构
+良好的项目组织结构是高效开发的基础，尤其对于Godot这类灵活的场景驱动引擎，此章节提供了一份可参考复用的目录架构使用
+首先你需要了解
+1.项目组织的核心原则
+Godot采用基于场景（Scene）的工作流，每个场景都是包含节点、脚本和资源的自包含单元。资源应就近存放于使用它们的场景附近，而非全局集中管理。例如：
+```
+characters/
+└── player/
+    ├── player.tscn          # 玩家场景
+    ├── player.gd            # 玩家控制脚本
+    └── textures/            # 专属纹理
+        ├── idle.png
+        └── run.png
+```
+为何按场景分组优于按类型分组？
+当需要复用角色时，直接复制 `entities/player` 文件夹到新项目，所有依赖资源自动包含。若采用集中式纹理目录，则需手动收集分散资源极易遗漏。
+在后续新建场景管理时也应该根据这个原则去管理你的项目的新场景和资源路径
+
+2.命名规范一致性
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 文件/文件夹 | snake_case（蛇形命名法） | `enemy_ai.gd` |
+| C# 脚本 | PascalCase | `PlayerController.cs` |
+| 场景节点 | PascalCase | `HitBox` |
+
+3.资源隔离与可见性控制
+有一些godot不需要读取的文档文件夹，建议通过让AI写一个 `.gdignore` 文件阻止Godot导入特定目录（如文档文件夹），既加速初始导入，又避免无关资源污染文件系统面板：
+
+```powershell
+# Windows 命令，在 docs 目录下创建 .gdignore
+type nul > .gdignore
+```
+
+---
+
+你的具体操作
+在开始项目前，让AI根据以下参考建立一个基本的项目架构目录
+
+请按照以下参考的目录设计和命名规范一致性建立一个基本的项目架构目录，注意实际内容如代码内容等不需要填充
+
+目录结构设计策略
+
+以下是经过验证的**平衡型结构**：
+
+```
+project.godot               # 项目配置文件
+
+addons/                     # 第三方插件资源
+
+assets/                     # 全局共享资源
+├── fonts/                  # 字体文件
+├── shaders/                # 全局着色器
+└── audio/                  # 音效与音乐
+
+scenes/                     # 游戏场景
+├── ui/                     # UI界面
+│   ├── main_menu.tscn
+│   └── hud.gd
+└── levels/                 # 游戏关卡
+    └── forest/             # 森林关卡资源组
+        ├── level_forest.tscn
+        └──  trees/          # 专属树木模型
+
+entities/                   # 游戏实体
+├── player/                 # 玩家角色（独立模块）
+│   ├── player.tscn
+│   ├── scripts/            # 专属脚本
+│   └── animations/         # 动画资源
+└── enemies/
+    ├── goblin/             # 哥布林实例
+    └── boss/               # BOSS实例
+
+systems/                    # 游戏系统
+├── state_machines/         # 状态机实现
+│   ├── state.gd            # 状态基类
+│   └── state_machine.gd    # 状态管理器
+└── dialogue_system/        # 对话系统
+
+docs/	
+.gdignore               # 忽略文档目录
+```
+
+命名规范一致性
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 文件/文件夹 | snake_case（蛇形命名法） | `enemy_ai.gd` |
+| C# 脚本 | PascalCase | `PlayerController.cs` |
+| 场景节点 | PascalCase | `HitBox` |
+
+
+
+二、Godot代码注释规范
+需要让AI明确Godot版本和代码版本及注释规范；
+
+先让AI知道使用的引擎版本和c#脚本版本，通常是Godot4.6.2+c#8.0
+
+然后让AI了解，你也需要清楚以下脚本组织规范，为了避免实现功能时候文本量太多进行污染，建议实际使用中先写出几个功能代码，然后依据以下规范进行改造，通常情况只要你将最先的几个代码使用了此注释进行改造后，AI后续会参考这种代码注释规范进行新代码的编写
+
+发给AI
+请你按照以下规范编写（补充）代码注释
+脚本头部标准结构
+
+每个脚本头部按以下顺序组织，无关内容不写：
+
+```csharp
+// ============================================================
+// PlayerController — 玩家移动与动画控制
+// 挂载位置：Player 场景根节点
+// ============================================================
+namespace Game.Entities.Player;
+
+public partial class PlayerController : CharacterBody2D
+{
+    // ----- 信号（对外接口）--------------------------------------
+    public event Action<int>? HealthChanged;
+
+    // ----- 常量 ------------------------------------------------
+    private const float MAX_SPEED = 300.0f;
+
+    // ----- 导出属性（设计师可配）--------------------------------
+    [Export] private float _health = 100.0f;
+
+    // ----- 公共属性 ---------------------------------------------
+    public Node? Target { get; set; }
+
+    // ----- 私有属性 ---------------------------------------------
+    private bool _isMoving = false;
+
+    // ----- 节点引用 ------------------------------------
+    private AnimatedSprite2D? _sprite;
+```
+
+### 2.2 脚本正文标准顺序
+
+```
+1. 生命周期（OnReady / OnProcess / OnPhysicsProcess）
+2. 初始化（InitFromConfig / Setup）
+3. 基类虚方法（Interface Contract）
+4. 公共方法（对外 API）
+5. 私有方法（内部逻辑）
+```
+
+### 2.3 注释规范
+
+```csharp
+// ===== 公共方法 ============================================
+public void PublicApi()
+{
+    /// <summary>公开方法：描述做什么和返回值。</summary>
+}
+
+// ----- 内部逻辑 --------------------------------------------
+private void InternalHelper()
+{
+    /// <summary>私有方法：描述做什么。</summary>
+}
+```
+
+**三条注释原则：**
+- 方法名能说清楚的，不写注释
+- 需要说明「为什么」的，写注释
+- 参数和返回值类型本身就够清晰的，不写冗余注释
+
+---
+
+

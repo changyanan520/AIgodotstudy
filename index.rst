@@ -1,7 +1,7 @@
-欢迎来到我的技术文档
+欢迎来到 Godot 技术文档
 =====================
 
-这是一个基于 Sphinx 生成的技术文档博客。
+这是一份 Godot 项目开发教程。
 
 目录
 ---
@@ -10,6 +10,7 @@
    :maxdepth: 2
 
    docs/getting-started
+   docs/chapter2_project_setup
 
 关于
 ---
